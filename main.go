@@ -19,6 +19,7 @@ var db, err = sql.Open("mysql", "root:12345678@/go_course?charset=utf8")
 
 func main() {
 	r := mux.NewRouter()
+	r.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
 	r.HandleFunc("/", HomeHandler)
 
 	fmt.Println(http.ListenAndServe(":8080", r))
