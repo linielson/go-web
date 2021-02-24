@@ -20,6 +20,7 @@ var db, err = sql.Open("mysql", "root:12345678@/go_course?charset=utf8")
 func main() {
 	r := mux.NewRouter()
 	r.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
+	r.HandleFunc("/{id}/view", ViewHandler)
 	r.HandleFunc("/", HomeHandler)
 
 	fmt.Println(http.ListenAndServe(":8080", r))
@@ -38,6 +39,14 @@ func HomeHandler(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+func ViewHandler(writer http.ResponseWriter, request *http.Request) {
+	id := mux.Vars(request)["id"]
+	t := template.Must(template.ParseFiles("templates/view.html"))
+	if err := t.ExecuteTemplate(writer, "view.html", GetPostById(id)); err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func ListPosts() []Post {
 	rows, error := db.Query("select * from posts")
 	checkError(error)
@@ -50,4 +59,11 @@ func ListPosts() []Post {
 		items = append(items, post)
 	}
 	return items
+}
+
+func GetPostById(id string) Post {
+	row := db.QueryRow("select * from posts where id=?", id)
+	post := Post{}
+	row.Scan(&post.Id, &post.Title, &post.Body)
+	return post
 }
