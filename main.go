@@ -33,18 +33,16 @@ func checkError(err error) {
 }
 
 func HomeHandler(writer http.ResponseWriter, request *http.Request) {
-	t := template.Must(template.ParseFiles("templates/index.html"))
-	if err := t.ExecuteTemplate(writer, "index.html", ListPosts()); err != nil {
+	t := template.Must(template.ParseFiles("templates/layout.html", "templates/list.html"))
+	if err := t.ExecuteTemplate(writer, "layout.html", ListPosts()); err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func ViewHandler(writer http.ResponseWriter, request *http.Request) {
 	id := mux.Vars(request)["id"]
-	t := template.Must(template.ParseFiles("templates/view.html"))
-	if err := t.ExecuteTemplate(writer, "view.html", GetPostById(id)); err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-	}
+	t := template.Must(template.ParseFiles("templates/layout.html", "templates/view.html"))
+	t.ExecuteTemplate(writer, "layout.html", GetPostById(id))
 }
 
 func ListPosts() []Post {
